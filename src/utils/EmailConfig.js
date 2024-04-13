@@ -1,17 +1,53 @@
 import nodemailer from "nodemailer";
+import bcrypt from "bcrypt";
+import { User } from "@/model/User";
+import { DatabaseConnection } from "./DatabaseConnection";
 
-function EmailConfiguration(params) {
+DatabaseConnection();
+
+export async function EmailConfiguration({ email, emailType, user }) {
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp.ethereal.email",
-      port: 587,
-      secure: false, // Use `true` for port 465, `false` for all other ports
+    const hashedToken = await bcrypt.hash(user.toString(), 10);
+    if (emailType === "VERIFY") {
+      await User.findByIdAndUpdate(user, {
+        $set: {
+          verifyToken: hashedToken,
+          verifyTokenExpiry: Date.now() + 60 * 60 * 1000,
+        },
+      });
+    } else if (emailType === "RESET") {
+      await User.findByIdAndUpdate(user, {
+        $set: {
+          forgetPasswordToken: hashedToken,
+          forgetPasswordToken: Date.now() + 60 * 60 * 1000,
+        },
+      });
+    }
+    var transport = nodemailer.createTransport({
+      host: process.env.HOST,
+      port: process.env.TRANSPORT_PORT,
       auth: {
-        user: "maddison53@ethereal.email",
-        pass: "jn7jnAPss4f63QBp6D",
+        user: process.env.USER,
+        pass: process.env.PASS,
       },
     });
+
+    const info = await transport.sendMail({
+      from: "benzaminbikash@gmail.com", // sender address
+      to: email,
+      subject:
+        emailType == "VERIFY"
+          ? "Please Verify your account"
+          : "Reset your password",
+
+      html: `<p>Click <a href='${
+        process.env.DOMAIN
+      }/verifyemail?token=${hashedToken}'>here</a> to ${
+        emailType == "VERIFY" ? "Verify your account" : "Reset your account"
+      } </p> <h1>${hashedToken}</h1> `, // html body
+    });
+    return info;
   } catch (error) {
-    console.log(error);
+    throw new Error(error.message);
   }
 }
