@@ -1,19 +1,35 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { toast } from "react-toastify";
+import { Dots } from "react-activity";
 
 const page = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      setError("Email and password are required.");
+      toast.error("Email or Password are missing!");
     } else {
-      setError("");
-      alert(`Your email is ${email}`);
+      setIsLoading(true);
+      const response = await fetch("http://localhost:3000/api/users/login", {
+        method: "POST",
+        body: JSON.stringify({
+          email,
+          password,
+        }),
+      });
+      const result = await response.json();
+      setIsLoading(false);
+      console.log(result);
+      if (result.status === true) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
     }
   };
   return (
@@ -22,7 +38,7 @@ const page = () => {
         <h1 className="text-2xl font-bold uppercase text-center animate-pulse mb-10">
           Login Here
         </h1>
-        <p className="text-red-500 font-bold mb-2"> {error != "" && error}</p>
+
         <form action="" onSubmit={handleSubmit} className="flex flex-col gap-4">
           <input
             onChange={(e) => setEmail(e.target.value)}
@@ -37,7 +53,7 @@ const page = () => {
             className="p-1 text-black rounded-sm focus:outline-1 outline-pink-800"
           />
           <button className="bg-red-500 p-1 rounded-sm w-20 self-center ">
-            Sign In
+            {isLoading ? <Dots /> : "Sign In"}
           </button>
         </form>
         <div className="flex justify-center mt-3 gap-2">

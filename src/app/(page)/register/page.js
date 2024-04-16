@@ -1,20 +1,39 @@
 "use client";
 import React, { useState } from "react";
 import Link from "next/link";
+import { toast } from "react-toastify";
+import { Dots } from "react-activity";
+import "react-activity/dist/library.css";
 
 const page = () => {
-  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!username || !email || !password) {
-      setError("Email and password are required.");
+    if (!name || !email || !password) {
+      setIsLoading(true);
+      toast.error("All fields are required.");
+      setIsLoading(false);
     } else {
-      setError("");
-      alert(`Your email is ${email}`);
+      setIsLoading(true);
+      const response = await fetch("http://localhost:3000/api/users/register", {
+        method: "POST",
+        body: JSON.stringify({
+          name,
+          email,
+          password,
+        }),
+      });
+      const result = await response.json();
+      setIsLoading(false);
+      if (result.status === true) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
     }
   };
   return (
@@ -25,9 +44,9 @@ const page = () => {
         </h1>
         <form onSubmit={handleSubmit} action="" className="flex flex-col gap-4">
           <input
-            onChange={(e) => setUsername(e.target.value)}
+            onChange={(e) => setName(e.target.value)}
             type="text"
-            placeholder="Username"
+            placeholder="Name"
             className="p-1 text-black rounded-sm focus:outline-1 outline-pink-800"
           />
           <input
@@ -43,7 +62,7 @@ const page = () => {
             className="p-1 text-black rounded-sm focus:outline-1 outline-pink-800"
           />
           <button className="bg-red-500 p-1 rounded-sm w-20 self-center">
-            Register
+            {isLoading ? <Dots /> : "Register"}
           </button>
         </form>
         <div className="flex justify-center mt-3 gap-2">
