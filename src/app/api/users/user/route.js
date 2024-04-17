@@ -7,7 +7,7 @@ export async function GET(req, res) {
     "-password -isVerified"
   );
   return NextResponse.json(
-    { message: "Single User Info", data: user, success: true },
+    { message: "Single User Info", data: user, status: true },
     { status: 200 }
   );
 }

@@ -1,9 +1,10 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import { ToastContainer, toast } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import "react-activity/dist/library.css";
 import Navbar from "@/components/Navbar";
+import { cookies } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,10 +14,13 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }) {
+  const cookiesession = cookies();
+  const tokenValue = cookiesession.get("token")?.value || null;
+
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar />
+        <Navbar token={tokenValue} />
         {children}
         <ToastContainer
           position="top-center"

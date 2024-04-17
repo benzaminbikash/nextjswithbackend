@@ -29,7 +29,7 @@ export async function POST(req, res) {
             message: "Login Successfully.",
             token,
             data: userData,
-            success: true,
+            status: true,
           },
           { status: 200 }
         );

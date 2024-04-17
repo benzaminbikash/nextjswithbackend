@@ -3,8 +3,10 @@ import React, { useState } from "react";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { Dots } from "react-activity";
+import { useRouter } from "next/navigation";
 
 const page = () => {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -12,7 +14,7 @@ const page = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
-      toast.error("Email or Password are missing!");
+      toast.error("Email and Password are required.");
     } else {
       setIsLoading(true);
       const response = await fetch("http://localhost:3000/api/users/login", {
@@ -24,17 +26,17 @@ const page = () => {
       });
       const result = await response.json();
       setIsLoading(false);
-      console.log(result);
       if (result.status === true) {
         toast.success(result.message);
+        router.push("/profile");
       } else {
         toast.error(result.message);
       }
     }
   };
   return (
-    <div className="w-screen h-screen flex justify-center items-center">
-      <div className="bg-black shadow-2xl shadow-white  w-1/3 rounded-md  px-5 py-10">
+    <div className="max-w-screen-2xl h-screen flex justify-center items-center">
+      <div className="bg-black shadow-sm shadow-gray-400  w-1/3 rounded-md  px-5 py-10">
         <h1 className="text-2xl font-bold uppercase text-center animate-pulse mb-10">
           Login Here
         </h1>

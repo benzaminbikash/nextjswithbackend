@@ -6,7 +6,6 @@ export async function POST(req, res) {
   try {
     const data = await req.json();
     const { token } = data;
-    console.log("token>>>>>", token);
     const user = await User.findOne({
       verifyToken: token,
       verifyTokenExpiry: { $gt: Date.now() },
@@ -19,7 +18,7 @@ export async function POST(req, res) {
     user.verifyTokenExpiry = undefined;
     await user.save();
     return NextResponse.json(
-      { message: "Verify user successfully!" },
+      { message: "Verify user successfully!", status: true },
       { status: 200 }
     );
   } catch (error) {
